@@ -3,303 +3,243 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>最高機密 — CLASSIFIED ACCESS TERMINAL</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>CLASSIFIED — 相関図 FILE-Ω</title>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{width:100%;min-height:100vh;background:#000}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    #app{
-      font-family:'Share Tech Mono',monospace;
-      background:#000;
-      color:#00ff41;
-      min-height:100vh;
-      width:100%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding:clamp(1rem,4vw,2.5rem);
-      position:relative;
-      overflow:hidden;
+    :root {
+      --green: #00ff41;
+      --green-dim: #00cc33;
+      --green-dark: #003300;
+      --green-mid: #006600;
+      --red: #ff0000;
+      --red-bg: #1a0000;
+      --amber: #ffaa00;
+      --mono: 'Share Tech Mono', monospace;
     }
 
-    /* スキャンライン */
-    #app::after{
-      content:'';position:fixed;top:0;left:0;right:0;
-      height:3px;background:rgba(0,255,65,.15);
-      animation:scan 3s linear infinite;pointer-events:none;
-      z-index:10;
-    }
-    @keyframes scan{0%{top:0}100%{top:100vh}}
-
-    .screen{
-      width:100%;
-      max-width:min(560px,100%);
+    html, body {
+      width: 100%; min-height: 100vh;
+      background: #000;
+      color: var(--green);
+      font-family: var(--mono);
+      overflow-x: hidden;
     }
 
-    .blink{animation:blink 1s step-start infinite}
-    @keyframes blink{50%{opacity:0}}
-
-    .label-top{
-      font-size:clamp(9px,2vw,11px);
-      color:#f00;letter-spacing:.15em;
-      margin-bottom:.5rem;text-transform:uppercase;
+    /* CRT scanlines overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 1000; pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+      );
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 999; pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
     }
 
-    .box{border:1px solid #00ff41;padding:clamp(.75rem,3vw,1.5rem);margin-bottom:clamp(1rem,3vw,1.5rem)}
-    .box-red{border-color:#f00;color:#f00}
+    .scanline {
+      position: fixed; top: -4px; left: 0; right: 0; height: 4px;
+      background: rgba(0,255,65,0.1); z-index: 1001; pointer-events: none;
+      animation: scan 4s linear infinite;
+    }
+    @keyframes scan { to { top: 100vh; } }
 
-    .title-main{
-      font-size:clamp(16px,5vw,22px);
-      font-weight:bold;letter-spacing:.1em;
-      text-align:center;margin-bottom:.5rem;color:#f00;
-    }
-    .subtitle{
-      font-size:clamp(9px,2.2vw,12px);
-      color:#f44;text-align:center;
-      letter-spacing:.2em;margin-bottom:clamp(.75rem,2vw,1.5rem);
-    }
+    .blink { animation: blink 1s step-start infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
 
-    .warning-block{
-      background:#1a0000;border:1px solid #f00;
-      padding:clamp(.75rem,3vw,1rem);
-      margin-bottom:clamp(1rem,3vw,1.5rem);
-      font-size:clamp(11px,2.5vw,13px);
-      line-height:1.7;color:#f66;
+    .pulse-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--green); margin-right: 6px;
+      animation: pdot 1.5s ease-in-out infinite;
     }
-    .warning-title{
-      color:#f00;font-size:clamp(12px,3vw,14px);
-      letter-spacing:.15em;margin-bottom:.5rem;text-align:center;
-    }
-    .divider{border:none;border-top:1px solid #003300;margin:.75rem 0}
+    @keyframes pdot { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-    .btn{
-      display:block;width:100%;
-      padding:clamp(.6rem,2.5vw,.75rem) 1rem;
-      font-family:'Share Tech Mono',monospace;
-      font-size:clamp(12px,3vw,14px);
-      letter-spacing:.1em;cursor:pointer;
-      text-align:center;border:none;transition:all .15s;
-    }
-    .btn-proceed{
-      background:#003300;color:#00ff41;
-      border:1px solid #00ff41;margin-bottom:.75rem;
-    }
-    .btn-proceed:hover{background:#005500}
-    .btn-proceed:active{transform:scale(.98)}
-
-    .status-row{
-      display:flex;justify-content:space-between;
-      align-items:center;
-      font-size:clamp(10px,2.2vw,12px);
-      color:#006600;margin-bottom:.5rem;
-    }
-    .status-ok{color:#00ff41}
-    .status-dot{
-      width:8px;height:8px;border-radius:50%;
-      background:#00ff41;display:inline-block;
-      margin-right:6px;
-      animation:pulse 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-
-    .phase{display:none}
-    .phase.active{display:block}
-
-    .progress-bar-wrap{
-      height:6px;background:#001100;
-      border:1px solid #003300;
-      margin:.5rem 0;overflow:hidden;
-    }
-    .progress-bar-fill{height:100%;background:#00ff41;width:0%;transition:width .3s}
-
-    .act-step{margin-top:clamp(.5rem,2vw,1rem);margin-bottom:.5rem}
-
-    .file-list{list-style:none}
-    .file-item{
-      display:flex;align-items:center;
-      padding:clamp(.5rem,2vw,.6rem) clamp(.5rem,2vw,.75rem);
-      border:1px solid #003300;
-      margin-bottom:.5rem;cursor:pointer;
-      font-size:clamp(10px,2.5vw,13px);
-      color:#00cc33;transition:all .15s;text-decoration:none;
-      gap:8px;
-    }
-    .file-item:hover{background:#001a00;border-color:#00ff41;color:#00ff41}
-    .file-icon{font-size:clamp(14px,3vw,16px);flex-shrink:0}
-    .file-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .file-badge{
-      flex-shrink:0;
-      font-size:clamp(8px,2vw,10px);
-      background:#f00;color:#fff;
-      padding:2px clamp(4px,1.5vw,6px);
-      letter-spacing:.1em;white-space:nowrap;
+    /* ===== LAYOUT ===== */
+    #page {
+      display: flex; flex-direction: column; min-height: 100vh;
     }
 
-    .welcome-header{
-      font-size:clamp(12px,3.5vw,16px);
-      color:#00ff41;letter-spacing:.2em;
-      margin-bottom:clamp(1rem,3vw,1.5rem);
-      text-align:center;line-height:1.8;
+    /* top bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: #000;
+      border-bottom: 1px solid var(--green-dark);
+      padding: clamp(.4rem,1.5vw,.65rem) clamp(1rem,3vw,1.5rem);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: .5rem;
     }
-    .footer-status{
-      font-size:clamp(9px,2vw,11px);
-      color:#004400;text-align:center;
-      margin-top:.75rem;letter-spacing:.1em;
+    .topbar-left { display: flex; align-items: center; gap: clamp(8px,2vw,14px); flex-wrap: wrap; }
+    .back-btn {
+      font-family: var(--mono); font-size: clamp(10px,2.2vw,12px);
+      color: var(--green-dim); background: none; border: 1px solid var(--green-dark);
+      padding: 3px 10px; cursor: pointer; letter-spacing: .1em; transition: all .15s;
     }
+    .back-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-dark); }
+    .topbar-logo { font-size: clamp(11px,2.5vw,13px); color: var(--red); letter-spacing: .2em; }
+    .topbar-file { font-size: clamp(9px,2vw,11px); color: var(--green-mid); letter-spacing: .1em; }
+    .topbar-right { font-size: clamp(9px,1.8vw,11px); color: var(--green-mid); letter-spacing: .1em; white-space: nowrap; }
+
+    /* content */
+    .content {
+      flex: 1;
+      padding: clamp(.75rem,3vw,1.5rem) clamp(1rem,4vw,2rem);
+      display: flex; flex-direction: column; gap: clamp(.75rem,2vw,1rem);
+    }
+
+    .section-header {
+      font-size: clamp(9px,2vw,11px); color: var(--green-mid);
+      letter-spacing: .2em; text-transform: uppercase;
+      border-bottom: 1px solid var(--green-dark);
+      padding-bottom: .4rem; margin-bottom: clamp(.5rem,1.5vw,.75rem);
+    }
+
+    /* metadata grid */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(160px,100%), 1fr));
+      gap: 1px; border: 1px solid var(--green-dark); background: var(--green-dark);
+      margin-bottom: clamp(.75rem,2vw,1rem);
+    }
+    .meta-cell { background: #000; padding: clamp(.4rem,1.5vw,.6rem) clamp(.6rem,2vw,.9rem); }
+    .meta-label { font-size: clamp(8px,1.8vw,10px); color: var(--green-mid); letter-spacing: .15em; margin-bottom: 3px; }
+    .meta-val { font-size: clamp(10px,2.2vw,12px); color: var(--green); }
+    .meta-val.red { color: var(--red); }
+    .meta-val.amber { color: var(--amber); }
+
+    /* image frame */
+    .img-frame {
+      border: 1px solid var(--green-dark);
+      padding: clamp(.5rem,2vw,.75rem);
+      position: relative;
+    }
+    .img-frame-label {
+      font-size: clamp(8px,1.8vw,10px); color: var(--red);
+      letter-spacing: .15em; text-align: center;
+      border-bottom: 1px solid #220000;
+      padding-bottom: .4rem; margin-bottom: .5rem;
+    }
+    .img-frame img {
+      width: 100%; height: auto; display: block;
+    }
+    /* corner brackets */
+    .img-frame-inner {
+      position: relative; display: inline-block; width: 100%;
+    }
+    .img-frame-inner::before,
+    .img-frame-inner::after,
+    .corner-br, .corner-bl {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; pointer-events: none;
+    }
+    .img-frame-inner::before { top: 0; left: 0; border-top: 1px solid var(--green); border-left: 1px solid var(--green); }
+    .img-frame-inner::after  { top: 0; right: 0; border-top: 1px solid var(--green); border-right: 1px solid var(--green); }
+    .corner-br { bottom: 0; right: 0; border-bottom: 1px solid var(--green); border-right: 1px solid var(--green); }
+    .corner-bl { bottom: 0; left: 0; border-bottom: 1px solid var(--green); border-left: 1px solid var(--green); }
+
+    .img-caption {
+      font-size: clamp(8px,1.8vw,10px); color: var(--green-mid);
+      text-align: center; margin-top: .5rem; letter-spacing: .1em;
+    }
+
+    /* bottom bar */
+    .bottombar {
+      border-top: 1px solid var(--green-dark);
+      padding: clamp(.35rem,1.2vw,.5rem) clamp(1rem,3vw,1.5rem);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: .4rem;
+      font-size: clamp(8px,1.8vw,10px);
+    }
+    .bottombar .warn-txt { color: var(--red); }
+    .bottombar .ts { color: var(--green-mid); }
   </style>
 </head>
 <body>
-<div id="app">
-  <div class="screen">
+<div class="scanline"></div>
+<div id="page">
 
-    <!-- Phase 1: Warning -->
-    <div class="phase active" id="phase-warning">
-      <div class="label-top blink">⚠ CLASSIFIED ACCESS TERMINAL v2.1 ⚠</div>
-      <div class="box box-red">
-        <div class="title-main">最高機密</div>
-        <div class="subtitle">EYES ONLY — CLEARANCE LEVEL: OMEGA</div>
-      </div>
-      <div class="warning-block">
-        <div class="warning-title">⚠ 警 告 ⚠</div>
-        <hr class="divider">
-        このファイルは管理者の権限により <span style="color:#f00;font-weight:bold">最高機密</span> に分類されています。<br><br>
-        このファイルにアクセスしている <span style="color:#f44">無許可の人物</span> は
-        <span style="color:#f00;font-weight:bold">ミーム殺害エージェント</span>
-        により即座に致死性の心停止が発生します。<br><br>
-        警告を理解した上で続行してください。
-      </div>
-      <button class="btn btn-proceed" onclick="startActivation()">▶ 続行する</button>
-      <div class="status-row">
-        <span><span class="status-dot"></span>端末オンライン</span>
-        <span id="ts" class="status-ok">--:--:--</span>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="back-btn" onclick="history.back()">◀ 戻る</button>
+      <span class="topbar-logo blink">⚠ 最高機密</span>
+      <span class="topbar-file">FILE-Ω :: 相関図 :: REV.4</span>
+    </div>
+    <div class="topbar-right">
+      <span class="pulse-dot"></span>SESSION ACTIVE &nbsp;|&nbsp; <span id="ts">--:--:--</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div>
+      <div class="section-header">// ファイル情報</div>
+      <div class="meta-grid">
+        <div class="meta-cell">
+          <div class="meta-label">分類レベル</div>
+          <div class="meta-val red">最高機密 / OMEGA</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">ファイル番号</div>
+          <div class="meta-val">FILE-Ω-2024-0831</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">ドキュメント種別</div>
+          <div class="meta-val">相関図 / CORRELATION MAP</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">アクセス状態</div>
+          <div class="meta-val amber">監視中</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">登録人物数</div>
+          <div class="meta-val">20 名</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">無断複写</div>
+          <div class="meta-val red">厳禁</div>
+        </div>
       </div>
     </div>
 
-    <!-- Phase 2: Activation -->
-    <div class="phase" id="phase-activation">
-      <div class="label-top blink">システム起動中...</div>
-      <div class="box">
-        <div class="status-row act-step">
-          <span>ミーム殺害エージェント 作動中</span>
-          <span id="act-1-status" style="color:#006600">待機中</span>
+    <div>
+      <div class="section-header">// 相関図データ</div>
+      <div class="img-frame">
+        <div class="img-frame-label">CLASSIFIED MATERIAL — AUTHORIZED VIEWING ONLY</div>
+        <div class="img-frame-inner">
+          <!--
+            ★ correlation-chart.png をこのHTMLと同じフォルダに置いてください
+          -->
+          <img src="correlation-chart.png" alt="人物相関図">
+          <span class="corner-br"></span>
+          <span class="corner-bl"></span>
         </div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="bar-1"></div></div>
-        <div class="status-row act-step">
-          <span>生命徴候の継続を確認</span>
-          <span id="act-2-status" style="color:#006600">待機中</span>
-        </div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="bar-2"></div></div>
-        <div class="status-row act-step">
-          <span>安全装置を解除</span>
-          <span id="act-3-status" style="color:#006600">待機中</span>
-        </div>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="bar-3"></div></div>
+        <div class="img-caption">[ 図表 Ω-01 — 人物相関図 — 無断転載禁止 ]</div>
       </div>
-    </div>
-
-    <!-- Phase 3: File list -->
-    <div class="phase" id="phase-files">
-      <div class="label-top">アクセス承認済み — AUTHORIZED</div>
-      <div class="welcome-header">ようこそ、担当者様。<br>ご希望のファイルを選択してください。</div>
-      <div class="box">
-        <!--
-          ============================================================
-          URLの変更はここで一括管理
-          各 onclick の 'FILE_URL_X' に対応するURLをFILESオブジェクトで設定
-          ============================================================
-        -->
-        <ul class="file-list">
-          <li><a class="file-item" href="#" onclick="openFile(event,'FILE_URL_1')">
-            <span class="file-icon" aria-hidden="true">📄</span>
-            <span class="file-name">作戦計画書_ALPHA.pdf</span>
-            <span class="file-badge">最高機密</span>
-          </a></li>
-          <li><a class="file-item" href="#" onclick="openFile(event,'FILE_URL_2')">
-            <span class="file-icon" aria-hidden="true">📄</span>
-            <span class="file-name">人員リスト_OMEGA.xlsx</span>
-            <span class="file-badge">最高機密</span>
-          </a></li>
-          <li><a class="file-item" href="#" onclick="openFile(event,'FILE_URL_3')">
-            <span class="file-icon" aria-hidden="true">📄</span>
-            <span class="file-name">技術仕様書_SIGMA.docx</span>
-            <span class="file-badge">機密</span>
-          </a></li>
-          <li><a class="file-item" href="#" onclick="openFile(event,'FILE_URL_4')">
-            <span class="file-icon" aria-hidden="true">🗂️</span>
-            <span class="file-name">資料フォルダ_CLASSIFIED</span>
-            <span class="file-badge">最高機密</span>
-          </a></li>
-        </ul>
-      </div>
-      <div class="footer-status blink">[ セッション監視中 — 全操作は記録されます ]</div>
     </div>
 
   </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottombar">
+    <span class="warn-txt blink">[ 全操作記録中 — 無断アクセスは即時通報されます ]</span>
+    <span class="ts" id="ts2">--:--:--</span>
+  </div>
+
 </div>
 
 <script>
-  // ============================================================
-  // URLをここで一括管理してください
-  // ============================================================
-  const FILES = {
-    FILE_URL_1: 'https://example.com/file1',
-    FILE_URL_2: 'https://example.com/file2',
-    FILE_URL_3: 'https://example.com/file3',
-    FILE_URL_4: 'correlation.html',
-  };
-
-  function openFile(e, key) {
-    e.preventDefault();
-    const url = FILES[key];
-    if (url) window.open(url, '_blank');
-  }
-
-  function showPhase(id) {
-    document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
-  function animateBar(barId, statusId, delay, cb) {
-    setTimeout(() => {
-      const bar = document.getElementById(barId);
-      const st = document.getElementById(statusId);
-      st.style.color = '#fa0';
-      st.textContent = '処理中...';
-      let w = 0;
-      const iv = setInterval(() => {
-        w += 4;
-        bar.style.width = w + '%';
-        if (w >= 100) {
-          clearInterval(iv);
-          bar.style.background = '#00ff41';
-          st.style.color = '#00ff41';
-          st.textContent = '完了 ✓';
-          if (cb) cb();
-        }
-      }, 30);
-    }, delay);
-  }
-
-  function startActivation() {
-    showPhase('phase-activation');
-    animateBar('bar-1','act-1-status',200,()=>{
-      animateBar('bar-2','act-2-status',400,()=>{
-        animateBar('bar-3','act-3-status',400,()=>{
-          setTimeout(()=>showPhase('phase-files'),600);
-        });
-      });
-    });
-  }
-
   function tick() {
-    const el = document.getElementById('ts');
-    if (el) el.textContent = new Date().toTimeString().slice(0,8);
+    const t = new Date().toTimeString().slice(0,8);
+    document.getElementById('ts').textContent = t;
+    document.getElementById('ts2').textContent = t;
   }
-  tick();
-  setInterval(tick, 1000);
+  tick(); setInterval(tick, 1000);
 </script>
 </body>
 </html>
