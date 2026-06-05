@@ -1,204 +1,158 @@
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-  
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>最高機密 — CLASSIFIED ACCESS TERMINAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{width:100%;min-height:100vh;background:#000}
 
-  #app {
-    font-family: 'Share Tech Mono', monospace;
-    background: #000;
-    color: #00ff41;
-    min-height: 600px;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+    #app{
+      font-family:'Share Tech Mono',monospace;
+      background:#000;
+      color:#00ff41;
+      min-height:100vh;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(1rem,4vw,2.5rem);
+      position:relative;
+      overflow:hidden;
+    }
 
-  .screen { width: 100%; max-width: 560px; }
+    /* スキャンライン */
+    #app::after{
+      content:'';position:fixed;top:0;left:0;right:0;
+      height:3px;background:rgba(0,255,65,.15);
+      animation:scan 3s linear infinite;pointer-events:none;
+      z-index:10;
+    }
+    @keyframes scan{0%{top:0}100%{top:100vh}}
 
-  .blink { animation: blink 1s step-start infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
+    .screen{
+      width:100%;
+      max-width:min(560px,100%);
+    }
 
-  .scanline {
-    position: relative;
-    overflow: hidden;
-  }
-  .scanline::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: rgba(0,255,65,0.15);
-    animation: scan 3s linear infinite;
-  }
-  @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+    .blink{animation:blink 1s step-start infinite}
+    @keyframes blink{50%{opacity:0}}
 
-  .label-top {
-    font-size: 11px;
-    color: #ff0000;
-    letter-spacing: 0.15em;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
+    .label-top{
+      font-size:clamp(9px,2vw,11px);
+      color:#f00;letter-spacing:.15em;
+      margin-bottom:.5rem;text-transform:uppercase;
+    }
 
-  .box {
-    border: 1px solid #00ff41;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
+    .box{border:1px solid #00ff41;padding:clamp(.75rem,3vw,1.5rem);margin-bottom:clamp(1rem,3vw,1.5rem)}
+    .box-red{border-color:#f00;color:#f00}
 
-  .box-red {
-    border-color: #ff0000;
-    color: #ff0000;
-  }
+    .title-main{
+      font-size:clamp(16px,5vw,22px);
+      font-weight:bold;letter-spacing:.1em;
+      text-align:center;margin-bottom:.5rem;color:#f00;
+    }
+    .subtitle{
+      font-size:clamp(9px,2.2vw,12px);
+      color:#f44;text-align:center;
+      letter-spacing:.2em;margin-bottom:clamp(.75rem,2vw,1.5rem);
+    }
 
-  .title-main {
-    font-size: 22px;
-    font-weight: bold;
-    letter-spacing: 0.1em;
-    text-align: center;
-    margin-bottom: 0.5rem;
-    color: #ff0000;
-  }
+    .warning-block{
+      background:#1a0000;border:1px solid #f00;
+      padding:clamp(.75rem,3vw,1rem);
+      margin-bottom:clamp(1rem,3vw,1.5rem);
+      font-size:clamp(11px,2.5vw,13px);
+      line-height:1.7;color:#f66;
+    }
+    .warning-title{
+      color:#f00;font-size:clamp(12px,3vw,14px);
+      letter-spacing:.15em;margin-bottom:.5rem;text-align:center;
+    }
+    .divider{border:none;border-top:1px solid #003300;margin:.75rem 0}
 
-  .subtitle {
-    font-size: 12px;
-    color: #ff4444;
-    text-align: center;
-    letter-spacing: 0.2em;
-    margin-bottom: 1.5rem;
-  }
+    .btn{
+      display:block;width:100%;
+      padding:clamp(.6rem,2.5vw,.75rem) 1rem;
+      font-family:'Share Tech Mono',monospace;
+      font-size:clamp(12px,3vw,14px);
+      letter-spacing:.1em;cursor:pointer;
+      text-align:center;border:none;transition:all .15s;
+    }
+    .btn-proceed{
+      background:#003300;color:#00ff41;
+      border:1px solid #00ff41;margin-bottom:.75rem;
+    }
+    .btn-proceed:hover{background:#005500}
+    .btn-proceed:active{transform:scale(.98)}
 
-  .warning-block {
-    background: #1a0000;
-    border: 1px solid #ff0000;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    font-size: 13px;
-    line-height: 1.7;
-    color: #ff6666;
-  }
+    .status-row{
+      display:flex;justify-content:space-between;
+      align-items:center;
+      font-size:clamp(10px,2.2vw,12px);
+      color:#006600;margin-bottom:.5rem;
+    }
+    .status-ok{color:#00ff41}
+    .status-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:#00ff41;display:inline-block;
+      margin-right:6px;
+      animation:pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-  .warning-title {
-    color: #ff0000;
-    font-size: 14px;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
+    .phase{display:none}
+    .phase.active{display:block}
 
-  .divider {
-    border: none;
-    border-top: 1px solid #003300;
-    margin: 1rem 0;
-  }
+    .progress-bar-wrap{
+      height:6px;background:#001100;
+      border:1px solid #003300;
+      margin:.5rem 0;overflow:hidden;
+    }
+    .progress-bar-fill{height:100%;background:#00ff41;width:0%;transition:width .3s}
 
-  .btn {
-    display: block;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    text-align: center;
-    border: none;
-    transition: all 0.15s;
-  }
+    .act-step{margin-top:clamp(.5rem,2vw,1rem);margin-bottom:.5rem}
 
-  .btn-proceed {
-    background: #003300;
-    color: #00ff41;
-    border: 1px solid #00ff41;
-    margin-bottom: 0.75rem;
-  }
-  .btn-proceed:hover { background: #005500; }
-  .btn-proceed:active { transform: scale(0.98); }
+    .file-list{list-style:none}
+    .file-item{
+      display:flex;align-items:center;
+      padding:clamp(.5rem,2vw,.6rem) clamp(.5rem,2vw,.75rem);
+      border:1px solid #003300;
+      margin-bottom:.5rem;cursor:pointer;
+      font-size:clamp(10px,2.5vw,13px);
+      color:#00cc33;transition:all .15s;text-decoration:none;
+      gap:8px;
+    }
+    .file-item:hover{background:#001a00;border-color:#00ff41;color:#00ff41}
+    .file-icon{font-size:clamp(14px,3vw,16px);flex-shrink:0}
+    .file-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .file-badge{
+      flex-shrink:0;
+      font-size:clamp(8px,2vw,10px);
+      background:#f00;color:#fff;
+      padding:2px clamp(4px,1.5vw,6px);
+      letter-spacing:.1em;white-space:nowrap;
+    }
 
-  .status-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    color: #006600;
-    margin-bottom: 0.5rem;
-  }
-  .status-ok { color: #00ff41; }
-  .status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #00ff41;
-    display: inline-block;
-    margin-right: 6px;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-  .phase { display: none; }
-  .phase.active { display: block; }
-
-  .progress-bar-wrap {
-    height: 6px;
-    background: #001100;
-    border: 1px solid #003300;
-    margin: 0.5rem 0;
-    overflow: hidden;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: #00ff41;
-    width: 0%;
-    transition: width 0.3s;
-  }
-
-  .file-list { list-style: none; }
-  .file-item {
-    display: flex;
-    align-items: center;
-    padding: 0.6rem 0.75rem;
-    border: 1px solid #003300;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    font-size: 13px;
-    color: #00cc33;
-    transition: all 0.15s;
-    text-decoration: none;
-  }
-  .file-item:hover {
-    background: #001a00;
-    border-color: #00ff41;
-    color: #00ff41;
-  }
-  .file-icon { margin-right: 10px; font-size: 16px; }
-  .file-badge {
-    margin-left: auto;
-    font-size: 10px;
-    background: #ff0000;
-    color: #fff;
-    padding: 2px 6px;
-    letter-spacing: 0.1em;
-  }
-
-  .welcome-header {
-    font-size: 16px;
-    color: #00ff41;
-    letter-spacing: 0.2em;
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-
-  .footer-status {
-    font-size: 11px;
-    color: #004400;
-    text-align: center;
-    margin-top: 1rem;
-    letter-spacing: 0.1em;
-  }
-</style>
-
-<div id="app" class="scanline">
-  <h2 class="sr-only">最高機密ファイルアクセスシステム</h2>
+    .welcome-header{
+      font-size:clamp(12px,3.5vw,16px);
+      color:#00ff41;letter-spacing:.2em;
+      margin-bottom:clamp(1rem,3vw,1.5rem);
+      text-align:center;line-height:1.8;
+    }
+    .footer-status{
+      font-size:clamp(9px,2vw,11px);
+      color:#004400;text-align:center;
+      margin-top:.75rem;letter-spacing:.1em;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
   <div class="screen">
 
     <!-- Phase 1: Warning -->
@@ -208,44 +162,39 @@
         <div class="title-main">最高機密</div>
         <div class="subtitle">EYES ONLY — CLEARANCE LEVEL: OMEGA</div>
       </div>
-
       <div class="warning-block">
         <div class="warning-title">⚠ 警 告 ⚠</div>
         <hr class="divider">
-        このファイルは管理者の権限により <span style="color:#ff0000;font-weight:bold;">最高機密</span> に分類されています。<br><br>
-        このファイルにアクセスしている <span style="color:#ff4444">無許可の人物</span> は
-        <span style="color:#ff0000;font-weight:bold;">ミーム殺害エージェント</span>
+        このファイルは管理者の権限により <span style="color:#f00;font-weight:bold">最高機密</span> に分類されています。<br><br>
+        このファイルにアクセスしている <span style="color:#f44">無許可の人物</span> は
+        <span style="color:#f00;font-weight:bold">ミーム殺害エージェント</span>
         により即座に致死性の心停止が発生します。<br><br>
         警告を理解した上で続行してください。
       </div>
-
       <button class="btn btn-proceed" onclick="startActivation()">▶ 続行する</button>
-
       <div class="status-row">
         <span><span class="status-dot"></span>端末オンライン</span>
         <span id="ts" class="status-ok">--:--:--</span>
       </div>
     </div>
 
-    <!-- Phase 2: Activation sequence -->
+    <!-- Phase 2: Activation -->
     <div class="phase" id="phase-activation">
       <div class="label-top blink">システム起動中...</div>
       <div class="box">
-        <div id="act-step-1" class="status-row" style="margin-bottom:0.75rem;">
+        <div class="status-row act-step">
           <span>ミーム殺害エージェント 作動中</span>
-          <span id="act-1-status" style="color:#006600;">待機中</span>
+          <span id="act-1-status" style="color:#006600">待機中</span>
         </div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" id="bar-1"></div></div>
-
-        <div id="act-step-2" class="status-row" style="margin-top:1rem;margin-bottom:0.75rem;">
+        <div class="status-row act-step">
           <span>生命徴候の継続を確認</span>
-          <span id="act-2-status" style="color:#006600;">待機中</span>
+          <span id="act-2-status" style="color:#006600">待機中</span>
         </div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" id="bar-2"></div></div>
-
-        <div id="act-step-3" class="status-row" style="margin-top:1rem;margin-bottom:0.75rem;">
+        <div class="status-row act-step">
           <span>安全装置を解除</span>
-          <span id="act-3-status" style="color:#006600;">待機中</span>
+          <span id="act-3-status" style="color:#006600">待機中</span>
         </div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" id="bar-3"></div></div>
       </div>
@@ -255,42 +204,36 @@
     <div class="phase" id="phase-files">
       <div class="label-top">アクセス承認済み — AUTHORIZED</div>
       <div class="welcome-header">ようこそ、担当者様。<br>ご希望のファイルを選択してください。</div>
-
       <div class="box">
-        <!-- URLはここで一括管理 -->
-        <!-- 各 data-url 属性を変更するだけでリンク先を指定できます -->
+        <!--
+          ============================================================
+          URLの変更はここで一括管理
+          各 onclick の 'FILE_URL_X' に対応するURLをFILESオブジェクトで設定
+          ============================================================
+        -->
         <ul class="file-list">
-          <li>
-            <a class="file-item" href="#" onclick="openFile(event, 'FILE_URL_1')">
-              <span class="file-icon" aria-hidden="true">📄</span>
-              作戦計画書_ALPHA.pdf
-              <span class="file-badge">最高機密</span>
-            </a>
-          </li>
-          <li>
-            <a class="file-item" href="#" onclick="openFile(event, 'FILE_URL_2')">
-              <span class="file-icon" aria-hidden="true">📄</span>
-              人員リスト_OMEGA.xlsx
-              <span class="file-badge">最高機密</span>
-            </a>
-          </li>
-          <li>
-            <a class="file-item" href="#" onclick="openFile(event, 'FILE_URL_3')">
-              <span class="file-icon" aria-hidden="true">📄</span>
-              技術仕様書_SIGMA.docx
-              <span class="file-badge">機密</span>
-            </a>
-          </li>
-          <li>
-            <a class="file-item" href="#" onclick="openFile(event, 'FILE_URL_4')">
-              <span class="file-icon" aria-hidden="true">🗂️</span>
-              資料フォルダ_CLASSIFIED
-              <span class="file-badge">最高機密</span>
-            </a>
-          </li>
+          <li><a class="file-item" href="#" onclick="openFile(event,'FILE_URL_1')">
+            <span class="file-icon" aria-hidden="true">📄</span>
+            <span class="file-name">作戦計画書_ALPHA.pdf</span>
+            <span class="file-badge">最高機密</span>
+          </a></li>
+          <li><a class="file-item" href="#" onclick="openFile(event,'FILE_URL_2')">
+            <span class="file-icon" aria-hidden="true">📄</span>
+            <span class="file-name">人員リスト_OMEGA.xlsx</span>
+            <span class="file-badge">最高機密</span>
+          </a></li>
+          <li><a class="file-item" href="#" onclick="openFile(event,'FILE_URL_3')">
+            <span class="file-icon" aria-hidden="true">📄</span>
+            <span class="file-name">技術仕様書_SIGMA.docx</span>
+            <span class="file-badge">機密</span>
+          </a></li>
+          <li><a class="file-item" href="#" onclick="openFile(event,'FILE_URL_4')">
+            <span class="file-icon" aria-hidden="true">🗂️</span>
+            <span class="file-name">資料フォルダ_CLASSIFIED</span>
+            <span class="file-badge">最高機密</span>
+          </a></li>
         </ul>
       </div>
-
       <div class="footer-status blink">[ セッション監視中 — 全操作は記録されます ]</div>
     </div>
 
@@ -298,6 +241,9 @@
 </div>
 
 <script>
+  // ============================================================
+  // URLをここで一括管理してください
+  // ============================================================
   const FILES = {
     FILE_URL_1: 'https://example.com/file1',
     FILE_URL_2: 'https://example.com/file2',
@@ -308,11 +254,7 @@
   function openFile(e, key) {
     e.preventDefault();
     const url = FILES[key];
-    if (url && url !== 'https://example.com/file1' && !url.startsWith('https://example.com')) {
-      window.open(url, '_blank');
-    } else {
-      openLink(url);
-    }
+    if (url) window.open(url, '_blank');
   }
 
   function showPhase(id) {
@@ -320,11 +262,11 @@
     document.getElementById(id).classList.add('active');
   }
 
-  function animateBar(barId, statusId, label, delay, cb) {
+  function animateBar(barId, statusId, delay, cb) {
     setTimeout(() => {
       const bar = document.getElementById(barId);
       const st = document.getElementById(statusId);
-      st.style.color = '#ffaa00';
+      st.style.color = '#fa0';
       st.textContent = '処理中...';
       let w = 0;
       const iv = setInterval(() => {
@@ -343,10 +285,10 @@
 
   function startActivation() {
     showPhase('phase-activation');
-    animateBar('bar-1', 'act-1-status', '', 200, () => {
-      animateBar('bar-2', 'act-2-status', '', 400, () => {
-        animateBar('bar-3', 'act-3-status', '', 400, () => {
-          setTimeout(() => showPhase('phase-files'), 600);
+    animateBar('bar-1','act-1-status',200,()=>{
+      animateBar('bar-2','act-2-status',400,()=>{
+        animateBar('bar-3','act-3-status',400,()=>{
+          setTimeout(()=>showPhase('phase-files'),600);
         });
       });
     });
@@ -354,11 +296,10 @@
 
   function tick() {
     const el = document.getElementById('ts');
-    if (el) {
-      const now = new Date();
-      el.textContent = now.toTimeString().slice(0,8);
-    }
+    if (el) el.textContent = new Date().toTimeString().slice(0,8);
   }
   tick();
   setInterval(tick, 1000);
 </script>
+</body>
+</html>
