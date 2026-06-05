@@ -30,7 +30,7 @@
       content:'';position:fixed;top:0;left:0;right:0;
       height:3px;background:rgba(0,255,65,.15);
       animation:scan 3s linear infinite;pointer-events:none;
-      z-index:10;
+      z-index:0;
     }
     @keyframes scan{0%{top:0}100%{top:100vh}}
 
@@ -86,6 +86,7 @@
     .btn-proceed{
       background:#003300;color:#00ff41;
       border:1px solid #00ff41;margin-bottom:.75rem;
+      position:relative;z-index:1;
     }
     .btn-proceed:hover{background:#005500}
     .btn-proceed:active{transform:scale(.98)}
@@ -248,7 +249,7 @@
     FILE_URL_1: 'https://example.com/file1',
     FILE_URL_2: 'https://example.com/file2',
     FILE_URL_3: 'https://example.com/file3',
-    FILE_URL_4: 'https://example.com/file4',
+    FILE_URL_4: 'correlation.html',
   };
 
   function openFile(e, key) {
