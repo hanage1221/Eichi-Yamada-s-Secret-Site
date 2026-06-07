@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLASSIFIED — この映像を最後まで絶対に見ないでください FILE-SECRET</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #00ff41;
+      --green-dim: #00cc33;
+      --green-dark: #003300;
+      --green-mid: #006600;
+      --red: #ff0000;
+      --red-bg: #1a0000;
+      --amber: #ffaa00;
+      --mono: 'Share Tech Mono', monospace;
+    }
+
+    html, body {
+      width: 100%; min-height: 100vh;
+      background: #000;
+      color: var(--green);
+      font-family: var(--mono);
+      overflow-x: hidden;
+    }
+
+    /* CRT scanlines overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 1000; pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+      );
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 999; pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+    }
+
+    .scanline {
+      position: fixed; top: -4px; left: 0; right: 0; height: 4px;
+      background: rgba(0,255,65,0.1); z-index: 1001; pointer-events: none;
+      animation: scan 4s linear infinite;
+    }
+    @keyframes scan { to { top: 100vh; } }
+
+    .blink { animation: blink 1s step-start infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .pulse-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--green); margin-right: 6px;
+      animation: pdot 1.5s ease-in-out infinite;
+    }
+    @keyframes pdot { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* ===== LAYOUT ===== */
+    #page {
+      display: flex; flex-direction: column; min-height: 100vh;
+    }
+
+    /* top bar */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: #000;
+      border-bottom: 1px solid var(--green-dark);
+      padding: clamp(.4rem,1.5vw,.65rem) clamp(1rem,3vw,1.5rem);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: .5rem;
+    }
+    .topbar-left { display: flex; align-items: center; gap: clamp(8px,2vw,14px); flex-wrap: wrap; }
+    .back-btn {
+      font-family: var(--mono); font-size: clamp(10px,2.2vw,12px);
+      color: var(--green-dim); background: none; border: 1px solid var(--green-dark);
+      padding: 3px 10px; cursor: pointer; letter-spacing: .1em; transition: all .15s;
+    }
+    .back-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-dark); }
+    .topbar-logo { font-size: clamp(11px,2.5vw,13px); color: var(--red); letter-spacing: .2em; }
+    .topbar-file { font-size: clamp(9px,2vw,11px); color: var(--green-mid); letter-spacing: .1em; }
+    .topbar-right { font-size: clamp(9px,1.8vw,11px); color: var(--green-mid); letter-spacing: .1em; white-space: nowrap; }
+
+    /* content */
+    .content {
+      flex: 1;
+      padding: clamp(.75rem,3vw,1.5rem) clamp(1rem,4vw,2rem);
+      display: flex; flex-direction: column; gap: clamp(.75rem,2vw,1rem);
+    }
+
+    .section-header {
+      font-size: clamp(9px,2vw,11px); color: var(--green-mid);
+      letter-spacing: .2em; text-transform: uppercase;
+      border-bottom: 1px solid var(--green-dark);
+      padding-bottom: .4rem; margin-bottom: clamp(.5rem,1.5vw,.75rem);
+    }
+
+    /* metadata grid */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(160px,100%), 1fr));
+      gap: 1px; border: 1px solid var(--green-dark); background: var(--green-dark);
+      margin-bottom: clamp(.75rem,2vw,1rem);
+    }
+    .meta-cell { background: #000; padding: clamp(.4rem,1.5vw,.6rem) clamp(.6rem,2vw,.9rem); }
+    .meta-label { font-size: clamp(8px,1.8vw,10px); color: var(--green-mid); letter-spacing: .15em; margin-bottom: 3px; }
+    .meta-val { font-size: clamp(10px,2.2vw,12px); color: var(--green); }
+    .meta-val.red { color: var(--red); }
+    .meta-val.amber { color: var(--amber); }
+
+    /* video frame */
+    .video-frame {
+      border: 1px solid var(--green-dark);
+      padding: clamp(.5rem,2vw,.75rem);
+      position: relative;
+    }
+    .video-frame-label {
+      font-size: clamp(8px,1.8vw,10px); color: var(--red);
+      letter-spacing: .15em; text-align: center;
+      border-bottom: 1px solid #220000;
+      padding-bottom: .4rem; margin-bottom: .5rem;
+    }
+
+    /* corner brackets */
+    .video-frame-inner {
+      position: relative; display: block; width: 100%;
+    }
+    .video-frame-inner::before,
+    .video-frame-inner::after,
+    .corner-br, .corner-bl {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; pointer-events: none;
+      z-index: 1;
+    }
+    .video-frame-inner::before { top: 0; left: 0; border-top: 1px solid var(--green); border-left: 1px solid var(--green); }
+    .video-frame-inner::after  { top: 0; right: 0; border-top: 1px solid var(--green); border-right: 1px solid var(--green); }
+    .corner-br { bottom: 0; right: 0; border-bottom: 1px solid var(--green); border-right: 1px solid var(--green); }
+    .corner-bl { bottom: 0; left: 0; border-bottom: 1px solid var(--green); border-left: 1px solid var(--green); }
+
+    /* video要素 */
+    .video-frame-inner video {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #000;
+    }
+
+    .video-caption {
+      font-size: clamp(8px,1.8vw,10px); color: var(--green-mid);
+      text-align: center; margin-top: .5rem; letter-spacing: .1em;
+    }
+
+    /* bottom bar */
+    .bottombar {
+      border-top: 1px solid var(--green-dark);
+      padding: clamp(.35rem,1.2vw,.5rem) clamp(1rem,3vw,1.5rem);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: .4rem;
+      font-size: clamp(8px,1.8vw,10px);
+    }
+    .bottombar .warn-txt { color: var(--red); }
+    .bottombar .ts { color: var(--green-mid); }
+  </style>
+</head>
+<body>
+<div class="scanline"></div>
+<div id="page">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo blink">⚠ 重要機密</span>
+      <span class="topbar-file">FILE-Ω :: この映像を最後まで絶対に見ないでください :: REV.1</span>
+    </div>
+    <div class="topbar-right">
+      <span class="pulse-dot"></span>SESSION ACTIVE &nbsp;|&nbsp; <span id="ts">--:--:--</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div>
+      <div class="section-header">// ファイル情報</div>
+      <div class="meta-grid">
+        <div class="meta-cell">
+          <div class="meta-label">分類レベル</div>
+          <div class="meta-val red">重要機密 / SECRET</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">ファイル番号</div>
+          <div class="meta-val">FILE-SECRET-2026-0607-1</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">ドキュメント種別</div>
+          <div class="meta-val">映像記録 / VIDEO LOG</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">アクセス状態</div>
+          <div class="meta-val amber">監視中</div>
+        </div>
+        <div class="meta-cell">
+          <div class="meta-label">無断複写</div>
+          <div class="meta-val red">厳禁</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-header">// この映像を最後まで絶対に見ないでください</div>
+      <div class="video-frame">
+        <div class="video-frame-label">CLASSIFIED MATERIAL — AUTHORIZED VIEWING ONLY</div>
+        <div class="video-frame-inner">
+          <!--
+            ★ mp4ファイルをこのHTMLと同じフォルダに置いて
+              src="ここにファイル名.mp4" に変更してください
+          -->
+<video controls controlslist="nodownload" style="display:block; width:100%;">
+  <source src="玉井賛歌_compressed.mp4" type="video/mp4">
+  お使いのブラウザは動画再生に対応していません。
+</video>
+</div>
+          <span class="corner-br"></span>
+          <span class="corner-bl"></span>
+        </div>
+        <div class="video-caption">[ この映像を最後まで絶対に見ないでください SECRET-01 — 無断転載禁止 ]</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottombar">
+    <span class="warn-txt blink">[ 全操作記録中 — 無断アクセスは即時通報されます ]</span>
+    <span class="ts" id="ts2">--:--:--</span>
+  </div>
+
+</div>
+
+<script>
+  function tick() {
+    const t = new Date().toTimeString().slice(0,8);
+    document.getElementById('ts').textContent = t;
+    document.getElementById('ts2').textContent = t;
+  }
+  tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>
